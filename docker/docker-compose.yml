@@ -1,0 +1,8 @@
+version: '2.1'
+services:
+  db:
+    image: postgres
+    container_name: db-notification
+    hostname: db-notification
+    ports:
+    -
