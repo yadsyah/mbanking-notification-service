@@ -1,6 +1,7 @@
 package id.co.diansetiyadi.notificationservice.dto.response;
 
 
+import jakarta.validation.constraints.Email;
 import lombok.*;
 
 @Setter

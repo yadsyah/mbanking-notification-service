@@ -1,6 +1,7 @@
 package id.co.diansetiyadi.notificationservice.dto.request;
 
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,5 +17,6 @@ public class RegisterEmailRequest extends BaseRequest {
     private String cif;
     private String accountNo;
     @NotBlank(message = "field cif must be not blank!")
+    @Email
     private String email;
 }

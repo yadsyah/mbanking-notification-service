@@ -1,5 +1,6 @@
 package id.co.diansetiyadi.notificationservice.entity;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 public class UserEmail extends BaseEntity {
 
+
+    @Email
     @NotBlank(message = "email must not blank!")
     private String email;
     @NotBlank(message = "email must not blank!")

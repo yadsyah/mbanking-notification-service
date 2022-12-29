@@ -135,7 +135,7 @@ public class NotificationServiceImpl implements NotificationService {
             return BaseResponse.builder().responseCode("00").message("Success").traceId("66").data(RegisterEmailResponse.builder().email(email).id(idUserEmail)).build();
         }
         checkExist.setEmail(email);
-        return BaseResponse.builder().responseCode("00").message("Success").traceId("66").data(RegisterEmailResponse.builder().email(email).id(checkExist.getId())).build();
+        return BaseResponse.builder().responseCode("00").message("Success").traceId("66").data(RegisterEmailResponse.builder().email(email).id(checkExist.getId()).build()).build();
 
     }
 
