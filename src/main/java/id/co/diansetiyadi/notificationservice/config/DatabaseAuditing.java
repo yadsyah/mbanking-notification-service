@@ -9,9 +9,6 @@ import java.util.Optional;
 public class DatabaseAuditing implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
-
-        String uname = "system";
-
-        return Optional.of(uname);
+        return Optional.of("system");
     }
 }

@@ -1,20 +1,23 @@
 package id.co.diansetiyadi.notificationservice.service.impl;
 
 import com.google.gson.Gson;
+import id.co.diansetiyadi.notificationservice.dto.request.SenderNotificationRequest;
 import id.co.diansetiyadi.notificationservice.dto.response.BaseResponse;
-import id.co.diansetiyadi.notificationservice.entity.NotificationType;
-import id.co.diansetiyadi.notificationservice.entity.UserTokenFirebaseFCM;
-import id.co.diansetiyadi.notificationservice.repository.UserTokenFirebaseFCMRepository;
+import id.co.diansetiyadi.notificationservice.dto.response.RegisterEmailResponse;
+import id.co.diansetiyadi.notificationservice.dto.response.SenderNotificationResponse;
+import id.co.diansetiyadi.notificationservice.entity.*;
+import id.co.diansetiyadi.notificationservice.repository.*;
 import id.co.diansetiyadi.notificationservice.service.NotificationService;
 import id.co.diansetiyadi.notificationservice.strategy.NotificationContext;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -23,18 +26,29 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationContext notificationContext;
     private final UserTokenFirebaseFCMRepository userTokenFirebaseFCMRepository;
+    private final UserEmailRepository userEmailRepository;
+    private final TemplateNotificationRepository templateNotificationRepository;
+    private final SchedulerNotificationRepository schedulerNotificationRepository;
+    private final NotificationRepository notificationRepository;
+    private final Gson gson;
+
 
     @Autowired
-    public NotificationServiceImpl(NotificationContext notificationContext, UserTokenFirebaseFCMRepository userTokenFirebaseFCMRepository) {
+    public NotificationServiceImpl(NotificationContext notificationContext, UserTokenFirebaseFCMRepository userTokenFirebaseFCMRepository, UserEmailRepository userEmailRepository, TemplateNotificationRepository templateNotificationRepository, SchedulerNotificationRepository schedulerNotificationRepository, NotificationRepository notificationRepository, Gson gson) {
         this.notificationContext = notificationContext;
         this.userTokenFirebaseFCMRepository = userTokenFirebaseFCMRepository;
+        this.userEmailRepository = userEmailRepository;
+        this.templateNotificationRepository = templateNotificationRepository;
+        this.schedulerNotificationRepository = schedulerNotificationRepository;
+        this.notificationRepository = notificationRepository;
+        this.gson = gson;
     }
 
     @Transactional
     @Override
-    public BaseResponse RegisterTokenFirebase(String deviceId, String accountNo, String tokenFcm, String cif) {
+    public BaseResponse registerTokenFirebase(String deviceId, String accountNo, String tokenFcm, String cif) {
         // todo logic persist to entity
-        UserTokenFirebaseFCM checkExist = userTokenFirebaseFCMRepository.findByCifOrAccountNoOrDeviceId(Sort.by("createdDate").descending(), cif, accountNo, deviceId).orElse(null);
+        UserTokenFirebaseFCM checkExist = userTokenFirebaseFCMRepository.findByCifOrAccountNoOrDeviceId(Sort.by("lastModifiedDate").descending(), cif, accountNo, deviceId).orElse(null);
 
         if (null == checkExist) {
             UserTokenFirebaseFCM newUserTokenFirebase = new UserTokenFirebaseFCM();
@@ -66,22 +80,63 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
     }
 
+    @SneakyThrows
     @Override
-    public BaseResponse senderNotification(NotificationType notificationType, List<String> paramArrayValue, String templateCode, String cif, String accountNo) {
-        Map<String, Object> mDataMessage = new HashMap<>();
-        mDataMessage.put("notificationType", notificationType);
-        mDataMessage.put("paramArrayValue", paramArrayValue);
-        mDataMessage.put("templateCode", templateCode);
-        mDataMessage.put("cif", cif);
-        mDataMessage.put("accountNo", accountNo);
-        notificationContext.sendMessage(new Gson().toJson(mDataMessage), notificationType);
-        return BaseResponse.builder().data(null).message("Success").responseCode("00").traceId("999").build();
+    public BaseResponse senderNotification(SenderNotificationRequest request) {
+
+//        templateNotificationRepository.findByTemplateCodeAndIsActiveIsTrue(request.getTemplateCode()).orElseThrow(() -> new TemplateNotificationNotFoundException("template notification not found!"));
+
+        Notification notification = new Notification();
+        notification.setNotificationType(request.getNotificationType());
+        notification.setCif(request.getCif());
+        notification.setAccountNo(request.getAccountNo());
+        notification.setTemplateCode(request.getTemplateCode());
+        notification.setAppVersion(request.getAppVersion());
+        notification.setScheduler(false);
+        notification.setAppVersion(request.getAppVersion());
+        notification.setParamArrayValue(Base64.getEncoder().encodeToString(new Gson().toJson(request.getParamArrayValue()).getBytes()));
+
+        if (request.getIsScheduler()) {
+            notification.setScheduler(true);
+            SchedulerNotification schedulerNotification = new SchedulerNotification();
+            schedulerNotification.setExecute(false);
+            schedulerNotification.setSchedulerDate(new SimpleDateFormat("dd-MM-yyyy").parse(request.getDateScheduler()));
+            String idSchedulerNotification = schedulerNotificationRepository.save(schedulerNotification).getId();
+            notification.setIdScheduler(idSchedulerNotification);
+        }
+        log.info("notification "+gson.toJson(notification));
+        String idNotification = notificationRepository.save(notification).getId();
+
+        notificationContext.sendMessage(new Gson().toJson(notification), request.getNotificationType());
+        return BaseResponse.builder()
+                .data(SenderNotificationResponse.builder()
+                                .notificationType(request.getNotificationType())
+                                .templateCode(request.getTemplateCode())
+                                .idMessage(idNotification)
+                                .build())
+                .message("Success")
+                .responseCode("00")
+                .traceId("999")
+                .build();
     }
 
     @Override
-    public Mono<?> RegisterEmail(String deviceId, String cif, String email) {
+    public BaseResponse registerEmail(String deviceId, String accountNo, String cif, String email, String appVersion) {
+        UserEmail checkExist = userEmailRepository.findByCifOrAccountNoOrDeviceId(Sort.by("lastModifiedDate").descending(), cif, accountNo, deviceId).orElse(null);
+        if (null == checkExist) {
+            UserEmail newUserEmail = new UserEmail();
+            newUserEmail.setEmail(email);
+            newUserEmail.setActive(true);
+            newUserEmail.setCif(cif);
+            newUserEmail.setAccountNo(accountNo);
+            newUserEmail.setDeviceId(deviceId);
+            newUserEmail.setAppVersion(appVersion);
+            String idUserEmail = userEmailRepository.save(newUserEmail).getId();
+            return BaseResponse.builder().responseCode("00").message("Success").traceId("66").data(RegisterEmailResponse.builder().email(email).id(idUserEmail)).build();
+        }
+        checkExist.setEmail(email);
+        return BaseResponse.builder().responseCode("00").message("Success").traceId("66").data(RegisterEmailResponse.builder().email(email).id(checkExist.getId())).build();
 
-        return null;
     }
 
 }

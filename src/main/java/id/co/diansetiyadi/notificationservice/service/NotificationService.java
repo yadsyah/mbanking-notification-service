@@ -1,5 +1,6 @@
 package id.co.diansetiyadi.notificationservice.service;
 
+import id.co.diansetiyadi.notificationservice.dto.request.SenderNotificationRequest;
 import id.co.diansetiyadi.notificationservice.dto.response.BaseResponse;
 import id.co.diansetiyadi.notificationservice.entity.NotificationType;
 import org.springframework.stereotype.Service;
@@ -9,10 +10,10 @@ import java.util.List;
 
 @Service
 public interface NotificationService {
-    BaseResponse RegisterTokenFirebase(String deviceId, String accountNo, String tokenFcm, String cif);
+    BaseResponse registerTokenFirebase(String deviceId, String accountNo, String tokenFcm, String cif);
 
-    BaseResponse senderNotification(NotificationType notificationType, List<String> paramArrayValue, String templateCode, String cif, String accountNo);
+    BaseResponse senderNotification(SenderNotificationRequest request);
 
-    Mono<?> RegisterEmail(String deviceId, String cif, String email);
+    BaseResponse registerEmail(String deviceId, String cif, String accountNo, String email, String appVersion);
 
 }

@@ -1,8 +1,6 @@
 package id.co.diansetiyadi.notificationservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.*;
@@ -18,13 +16,13 @@ public abstract class BaseEntity {
     private String id;
 
     @JsonIgnore
-    private boolean deleted = false;
+    private boolean deleted;
 
     @JsonIgnore
-    private boolean updated = false;
+    private boolean updated;
 
     @JsonIgnore
-    private  boolean isActive = false;
+    private  boolean isActive;
 
     @CreatedBy
     private String createdByUser;
@@ -38,5 +36,7 @@ public abstract class BaseEntity {
 
     @LastModifiedBy
     private String lastModifiedUserId;
+
+    private String appVersion;
 
 }

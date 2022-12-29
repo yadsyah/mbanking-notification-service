@@ -5,6 +5,7 @@ import id.co.diansetiyadi.notificationservice.dto.request.RegisterTokenFirebaseR
 import id.co.diansetiyadi.notificationservice.dto.request.SenderNotificationRequest;
 import id.co.diansetiyadi.notificationservice.dto.response.BaseResponse;
 import id.co.diansetiyadi.notificationservice.service.NotificationService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,18 +27,17 @@ public class NotificationController {
 
     @PostMapping("/sender-notification")
     @ResponseBody
-    public Mono<BaseResponse> SenderNotification(@RequestBody SenderNotificationRequest senderNotificationRequest) {
-        return Mono.just(notificationService.senderNotification(senderNotificationRequest.getNotificationType(), senderNotificationRequest.getParamArrayValue(),
-                senderNotificationRequest.getTemplateCode(), senderNotificationRequest.getCif(), senderNotificationRequest.getAccountNo()));
+    public Mono<BaseResponse> senderNotification(@RequestBody @Valid SenderNotificationRequest senderNotificationRequest) {
+        return Mono.just(notificationService.senderNotification(senderNotificationRequest));
     }
 
     @PostMapping("/register-token-firebase")
-    public Mono<?> RegisterTokenFirebase(@RequestBody RegisterTokenFirebaseRequest request) {
-        return Mono.just(notificationService.RegisterTokenFirebase(request.getDeviceId(), request.getAccountNo(), request.getTokenFirebase(), request.getCif()));
+    public Mono<BaseResponse> registerTokenFirebase(@RequestBody @Valid RegisterTokenFirebaseRequest request) {
+        return Mono.just(notificationService.registerTokenFirebase(request.getDeviceId(), request.getAccountNo(), request.getTokenFirebase(), request.getCif()));
     }
 
     @PostMapping("/register-email")
-    public Mono<?> RegisterEmail(@RequestBody RegisterEmailRequest request) {
-        return notificationService.RegisterEmail(request.getDeviceId(), request.getCif(), request.getEmail());
+    public Mono<BaseResponse> registerEmail(@RequestBody @Valid RegisterEmailRequest request) {
+        return Mono.just(notificationService.registerEmail(request.getDeviceId(), request.getCif(), request.getAccountNo(), request.getEmail(), request.getAppVersion()));
     }
 }
