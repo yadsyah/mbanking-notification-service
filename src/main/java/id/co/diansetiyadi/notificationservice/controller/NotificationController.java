@@ -33,7 +33,7 @@ public class NotificationController {
 
     @PostMapping("/register-token-firebase")
     public Mono<?> RegisterTokenFirebase(@RequestBody RegisterTokenFirebaseRequest request) {
-        return notificationService.RegisterTokenFirebase(request.getDeviceId(), request.getTokenFirebase(), request.getCif());
+        return Mono.just(notificationService.RegisterTokenFirebase(request.getDeviceId(), request.getAccountNo(), request.getTokenFirebase(), request.getCif()));
     }
 
     @PostMapping("/register-email")

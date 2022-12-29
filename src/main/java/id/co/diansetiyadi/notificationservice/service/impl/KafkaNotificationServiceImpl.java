@@ -1,6 +1,5 @@
 package id.co.diansetiyadi.notificationservice.service.impl;
 
-import id.co.diansetiyadi.notificationservice.entity.Notification;
 import id.co.diansetiyadi.notificationservice.service.KafkaNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +15,6 @@ public class KafkaNotificationServiceImpl implements KafkaNotificationService {
     @Autowired
     public KafkaNotificationServiceImpl(KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
-    }
-
-
-    @Override
-    public void PublishSendNotification(Notification notification) {
-
     }
 
     @Override

@@ -6,7 +6,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface KafkaNotificationService {
 
-    void PublishSendNotification(Notification notification);
-
     void sendMessage(String topicName, String message);
 }

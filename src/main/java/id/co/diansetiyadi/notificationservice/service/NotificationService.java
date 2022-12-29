@@ -9,11 +9,10 @@ import java.util.List;
 
 @Service
 public interface NotificationService {
-    Mono<?> RegisterTokenFirebase(String deviceId, String tokenFcm, String cif);
+    BaseResponse RegisterTokenFirebase(String deviceId, String accountNo, String tokenFcm, String cif);
 
     BaseResponse senderNotification(NotificationType notificationType, List<String> paramArrayValue, String templateCode, String cif, String accountNo);
 
     Mono<?> RegisterEmail(String deviceId, String cif, String email);
 
-    void SendNotificationManager(NotificationType notificationType, List<String> paramArrayValue, String templateCode, String cif, String accountNo);
 }
