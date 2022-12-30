@@ -2,6 +2,7 @@ package id.co.diansetiyadi.notificationservice.dto.request;
 
 
 import id.co.diansetiyadi.notificationservice.entity.NotificationType;
+import id.co.diansetiyadi.notificationservice.util.CategoryInboxEnum;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,8 @@ public class SenderNotificationRequest extends BaseRequest {
     private List<String> paramArrayValue;
     private String email;
     private String phoneNo;
+    private String messageDetailInbox;
+    private CategoryInboxEnum categoryInboxEnum;
     @NotNull(message = "isScheduler must be not null!")
     private boolean isScheduler;
     private String dateScheduler;

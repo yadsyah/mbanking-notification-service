@@ -1,6 +1,7 @@
 package id.co.diansetiyadi.notificationservice.entity;
 
 
+import id.co.diansetiyadi.notificationservice.util.CategoryInboxEnum;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,4 +28,6 @@ public class Notification extends BaseEntity {
     @Email
     private String email;
     private String phoneNo;
+    private CategoryInboxEnum categoryInboxEnum;
+    private String messageDetailInbox;
 }
