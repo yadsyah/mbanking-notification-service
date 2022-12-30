@@ -1,6 +1,8 @@
 package id.co.diansetiyadi.notificationservice.service.impl;
 
 import com.google.gson.Gson;
+import id.co.diansetiyadi.notificationservice.advice.EmailNotFoundException;
+import id.co.diansetiyadi.notificationservice.advice.TokenFirebaseNotFoundException;
 import id.co.diansetiyadi.notificationservice.dto.request.SenderNotificationRequest;
 import id.co.diansetiyadi.notificationservice.dto.response.BaseResponse;
 import id.co.diansetiyadi.notificationservice.dto.response.RegisterEmailResponse;
@@ -59,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
             newUserTokenFirebase.setActive(true);
             userTokenFirebaseFCMRepository.save(newUserTokenFirebase);
             return BaseResponse.builder()
-                    .traceId("777")
+                    .traceId(UUID.randomUUID().toString())
                     .responseCode("00")
                     .message("Success")
                     .data(null)
@@ -73,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         return BaseResponse.builder()
-                .traceId("777")
+                .traceId(UUID.randomUUID().toString())
                 .responseCode("00")
                 .message("Success")
                 .data(null)
@@ -85,7 +87,6 @@ public class NotificationServiceImpl implements NotificationService {
     public BaseResponse senderNotification(SenderNotificationRequest request) {
 
 //        templateNotificationRepository.findByTemplateCodeAndIsActiveIsTrue(request.getTemplateCode()).orElseThrow(() -> new TemplateNotificationNotFoundException("template notification not found!"));
-
         Notification notification = new Notification();
         notification.setNotificationType(request.getNotificationType());
         notification.setCif(request.getCif());
@@ -94,7 +95,22 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setAppVersion(request.getAppVersion());
         notification.setScheduler(false);
         notification.setAppVersion(request.getAppVersion());
+        notification.setPhoneNo(request.getPhoneNo());
         notification.setParamArrayValue(Base64.getEncoder().encodeToString(new Gson().toJson(request.getParamArrayValue()).getBytes()));
+
+        if (request.getNotificationType().equals(NotificationType.FIREBASE)) {
+            UserTokenFirebaseFCM userTokenFirebaseFCM = userTokenFirebaseFCMRepository.findByCifOrAccountNoOrDeviceId(
+                    Sort.by("lastModifiedDate").descending(), request.getCif(), request.getAccountNo(),
+                    request.getDeviceId()).orElseThrow(() -> new TokenFirebaseNotFoundException("token firebase not found!"));
+            notification.setTokenFCM(userTokenFirebaseFCM.getTokenFcm());
+        }
+
+        if (request.getNotificationType().equals(NotificationType.MAIL)) {
+            UserEmail userEmail = userEmailRepository.findByCifOrAccountNoOrDeviceId(
+                    Sort.by("lastModifiedDate").descending(), request.getCif(), request.getAccountNo(),
+                    request.getDeviceId()).orElseThrow(()-> new EmailNotFoundException("email not found!"));
+            notification.setEmail(userEmail.getEmail());
+        }
 
         if (request.getIsScheduler()) {
             notification.setScheduler(true);
@@ -104,7 +120,7 @@ public class NotificationServiceImpl implements NotificationService {
             String idSchedulerNotification = schedulerNotificationRepository.save(schedulerNotification).getId();
             notification.setIdScheduler(idSchedulerNotification);
         }
-        log.info("notification "+gson.toJson(notification));
+        log.info("notification : {}", gson.toJson(notification));
         String idNotification = notificationRepository.save(notification).getId();
 
         notificationContext.sendMessage(new Gson().toJson(notification), request.getNotificationType());
@@ -116,7 +132,7 @@ public class NotificationServiceImpl implements NotificationService {
                                 .build())
                 .message("Success")
                 .responseCode("00")
-                .traceId("999")
+                .traceId(UUID.randomUUID().toString())
                 .build();
     }
 
@@ -132,10 +148,10 @@ public class NotificationServiceImpl implements NotificationService {
             newUserEmail.setDeviceId(deviceId);
             newUserEmail.setAppVersion(appVersion);
             String idUserEmail = userEmailRepository.save(newUserEmail).getId();
-            return BaseResponse.builder().responseCode("00").message("Success").traceId("66").data(RegisterEmailResponse.builder().email(email).id(idUserEmail)).build();
+            return BaseResponse.builder().responseCode("00").message("Success").traceId(UUID.randomUUID().toString()).data(RegisterEmailResponse.builder().email(email).id(idUserEmail)).build();
         }
         checkExist.setEmail(email);
-        return BaseResponse.builder().responseCode("00").message("Success").traceId("66").data(RegisterEmailResponse.builder().email(email).id(checkExist.getId()).build()).build();
+        return BaseResponse.builder().responseCode("00").message("Success").traceId(UUID.randomUUID().toString()).data(RegisterEmailResponse.builder().email(email).id(checkExist.getId()).build()).build();
 
     }
 

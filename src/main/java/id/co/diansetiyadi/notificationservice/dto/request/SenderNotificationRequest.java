@@ -22,6 +22,7 @@ public class SenderNotificationRequest extends BaseRequest {
     private NotificationType notificationType;
     private List<String> paramArrayValue;
     private String email;
+    private String phoneNo;
     @NotNull(message = "isScheduler must be not null!")
     private boolean isScheduler;
     private String dateScheduler;

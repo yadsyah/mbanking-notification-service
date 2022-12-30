@@ -1,6 +1,7 @@
 package id.co.diansetiyadi.notificationservice.entity;
 
 
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,4 +24,7 @@ public class Notification extends BaseEntity {
     private NotificationType notificationType;
     private boolean isScheduler;
     private String idScheduler;
+    @Email
+    private String email;
+    private String phoneNo;
 }
