@@ -25,7 +25,6 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Sender Notification") })
     @PostMapping("/sender-notification")
     @ResponseBody

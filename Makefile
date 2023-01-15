@@ -2,10 +2,8 @@ COMMIT_ID_HASH ?= $(shell git rev-parse HEAD)
 VERSION_BRANCH ?= $(shell git symbolic-ref --short HEAD)
 APP     ?= notification-service
 IMAGE   ?= $(APP):$(COMMIT_ID_HASH)
-DB_IMAGE ?= digital-mortgage-db
-DB_IMAGE_TEST ?= digital-mortgage-db-test
-ZIPKIN_IMAGE ?= zipkin-server
 VERSION ?= $(VERSION_BRANCH)-$(COMMIT_ID_HASH)
+MY_HUB_DOCKER ?= diyset
 .DEFAULT_GOAL := list
 
 .PHONY: list
@@ -32,12 +30,11 @@ maven-verify:
 	- mvn clean verify -Dmaven.test.skip
 run:
 	- mvn spring-boot:run
-
-docker-build-embed-tomcat:
-	- docker build -f docker/Dockerfile -t $(APP):embed-$(VERSION) .
+docker-build:
+	- docker build -f docker/Dockerfile -t $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest .
 docker-push:
-	- docker tag $(APP):embed-$(VE  RSION) $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest
-	- docker push 
+	- docker tag $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest
+	- docker push $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest
 docker-push-latest:
-	- make docker=build-embed-tomcat
-	- docker tag $(APP):embed-$(VE  RSION) $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest
+	- make docker-build-embed-tomcat
+	- docker tag $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest
