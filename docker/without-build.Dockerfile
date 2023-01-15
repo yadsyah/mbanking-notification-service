@@ -1,4 +1,6 @@
 FROM openjdk:17-alpine as RUN-APPS
+LABEL DEVELOPER="diyansetiyadi@gmail.com"
+LABEL APPS-NAME="notification-service"
 USER root
 WORKDIR /apps
 #COPY --from=BUILD-APPS /build-apps/app/target/*.jar /apps/apps.jar

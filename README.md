@@ -13,6 +13,7 @@
 - `/sender-notification` = Reserve Send Notification
 - `/register-token-firebase` = Register Token Device
 - `/register-mail` = Register Mail
+- `/swagger-ui` = API Docs Swagger
 
 ## How's to Run Local
 

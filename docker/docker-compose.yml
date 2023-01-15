@@ -1,5 +1,37 @@
 version: '3.1'
 services:
+  db-notification-service:
+    image: mongo
+    container_name: db-notification-service
+    hostname: db-notification-service
+    restart: always
+    volumes:
+      - mongodb_data_notification:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      
+  notification-service:
+    image: diyset/notification-service:master-latest
+    hostname: notification-service
+    container_name: notification-service
+    environment:
+      DEBUG: false
+      DB_ENGINE: mongodb
+      DB_USER: root
+      DB_PASSWORD: example
+      DB_NAME: mbanking_notification
+      DB_PORT: 27017
+      DB_HOST: db-notification-service
+      KAFKA_HOST: host.docker.internal:29092
+      KAFKA_PORT: 9092
+      PORT: 8080
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - dbnotif
+      - kafka1
+    ports:
+      - 9202:8080
   zookeeper1:
     image: confluentinc/cp-zookeeper:latest
     hostname: zookeeper1
@@ -31,26 +63,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_JMX_HOSTNAME: ${DOCKER_HOST_IP:-127.0.0.1}
       KAFKA_JMX_PORT: 9999
-  dbnotif:
-    image: mongo
-    hostname: mongodb-notification
-    container_name: mongodb-notification
-    ports:
-      - 27017:27017
-    volumes:
-      - mongodb_data_container:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8099:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
 
 volumes:
-  mongodb_data_container:
+  mongodb_data_notification:
