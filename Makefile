@@ -9,7 +9,7 @@ MY_HUB_DOCKER ?= diyset
 .PHONY: list
 clean:
 	@echo "Clean All Container"
-	- docker rm -f $($DB_IMAGE)
+	- docker rm -f $(DB_IMAGE)
 	- docker rm -f $(DB_IMAGE_TEST)
 	- docker rm -f $(APP)
 list:
@@ -30,13 +30,17 @@ maven-verify:
 	- mvn clean verify -Dmaven.test.skip
 run:
 	- mvn spring-boot:run
+compile:
+	- mvn clean install -Dmaven.test.skip
 docker-build:
 	- docker build -f docker/Dockerfile -t $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest .
 docker-build-without-compile:
+	- make compile
 	- docker build -f docker/without-build.Dockerfile -t $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest .
 docker-push:
+	- make docker-build-without-compile
 	- docker tag $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest
 	- docker push $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest
 docker-push-latest:
-	- make docker-build-embed-tomcat
+	- make docker-build
 	- docker tag $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest $(MY_HUB_DOCKER)/$(APP):$(VERSION_BRANCH)-latest
